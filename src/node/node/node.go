@@ -30,7 +30,7 @@ type Config struct {
 type Node struct {
 	conf Config
 	sync.RWMutex
-	hb chan struct{}
+	stop chan struct{}
 	data map[storage.RecordID][]byte
 }
 
@@ -38,7 +38,7 @@ type Node struct {
 //
 // New создает новый Node с данным cfg.
 func New(cfg Config) *Node {
-	return &Node{conf: cfg, hb: make(chan struct{}), data: make(map[storage.RecordID][]byte)}
+	return &Node{conf: cfg, stop: make(chan struct{}), data: make(map[storage.RecordID][]byte)}
 }
 
 // Heartbeats runs heartbeats from node to a router
@@ -50,7 +50,7 @@ func (node *Node) Heartbeats() {
 	go func() {
 		for {
 			select {
-			case <-node.hb:
+			case <-node.stop:
 				return
 			default:
 				node.conf.Client.Heartbeat(node.conf.Router, node.conf.Addr)
@@ -64,7 +64,7 @@ func (node *Node) Heartbeats() {
 //
 // Stop останавливает отправку heartbeats.
 func (node *Node) Stop() {
-		node.hb <- struct{}{}
+		node.stop <- struct{}{}
 }
 
 // Put an item to the node if an item for the given key doesn't exist.
