@@ -84,11 +84,11 @@ func (r *Router) Heartbeat(node storage.ServiceAddr) error {
 // запись с ключом k. Возвращает ошибку storage.ErrNotEnoughDaemons
 // если меньше, чем storage.MinRedundancy найдено.
 func (r *Router) NodesFind(k storage.RecordID) ([]storage.ServiceAddr, error) {
-	posible := r.conf.NodesFinder.NodesFind(k, r.conf.Nodes)
-	available := make([]storage.ServiceAddr, 0, len(posible))
+	possible := r.conf.NodesFinder.NodesFind(k, r.conf.Nodes)
+	available := make([]storage.ServiceAddr, 0, len(possible))
 	now := time.Now()
 
-	for _, node := range posible {
+	for _, node := range possible {
 		r.lock.RLock()
 
 		diff := now.Sub(r.hb[node])
